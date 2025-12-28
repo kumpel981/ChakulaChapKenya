@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChakulaChap Kenya - Smart Meal Finder for Students</title>
+    
+    <!-- PWA Meta -->
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="description" content="AI-powered meal advisor for Kenyan university students. Find affordable, healthy meals on campus.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="assets/images/favicon.ico">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <div class="logo-circle">
+                    <span>🍛</span>
+                </div>
+                <h1>ChakulaChap</h1>
+                <p class="logo-subtitle">Kenya</p>
+            </div>
+            <div class="loading-spinner"></div>
+            <p>Loading meal database...</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo -->
+            <div class="nav-logo">
+                <div class="logo-icon">🍛</div>
+                <div class="logo-text">
+                    <span class="logo-primary">ChakulaChap</span>
+                    <span class="logo-secondary">Kenya</span>
+                </div>
+            </div>
+            
+            <!-- Menu -->
+            <div class="nav-menu">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#find" class="nav-link">Find Meals</a>
+                <a href="#campuses" class="nav-link">Campuses</a>
+                <a href="#plans" class="nav-link">Meal Plans</a>
+                <a href="#whatsapp" class="nav-link">WhatsApp</a>
+                <a href="admin.html" class="nav-link admin">Admin</a>
+            </div>
+            
+            <!-- User -->
+            <div class="nav-user">
+                <button class="btn-login" id="loginBtn">
+                    <i class="fas fa-user"></i> Login
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span><i class="fas fa-star"></i> Made for Kenyan Students</span>
+                </div>
+                <h1 class="hero-title">
+                    Eat Smart, <span class="highlight">Save Smart</span>
+                    <span class="hero-subtitle">on Kenyan Campuses</span>
+                </h1>
+                <p class="hero-description">
+                    AI-powered meal advisor that helps Kenyan university students find affordable, 
+                    healthy meals based on their budget and location. Never worry about what to eat again!
+                </p>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number" id="campusesCount">8+</div>
+                        <div class="stat-label">Campuses</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="mealsCount">500+</div>
+                        <div class="stat-label">Meal Options</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="avgPrice">KES 85</div>
+                        <div class="stat-label">Average Price</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="studentsCount">2,000+</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                </div>
+                
+                <div class="hero-cta">
+                    <a href="#find" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Find Meals Now
+                    </a>
+                    <a href="https://wa.me/254778796999" class="btn btn-whatsapp" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Bot
+                    </a>
+                </div>
+            </div>
+            
+            <div class="hero-image">
+                <div class="floating-card card-1">
+                    <div class="card-badge best">Best Value</div>
+                    <h4>Githeri Special</h4>
+                    <p class="card-price">KES 70</p>
+                    <p class="card-location">University of Nairobi</p>
+                </div>
+                <div class="floating-card card-2">
+                    <div class="card-badge healthy">Healthy</div>
+                    <h4>Chapati + Beans</h4>
+                    <p class="card-price">KES 60</p>
+                    <p class="card-location">Kenyatta University</p>
+                </div>
+                <div class="floating-card card-3">
+                    <div class="card-badge budget">Budget</div>
+                    <h4>Mandazi + Tea</h4>
+                    <p class="card-price">KES 30</p>
+                    <p class="card-location">JKUAT Juja</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Meal Finder -->
+    <section class="finder-section" id="find">
+        <div class="container">
+            <div class="section-header">
+                <h2>Find Your Perfect Meal</h2>
+                <p>Select campus, set budget, get instant recommendations</p>
+            </div>
+            
+            <div class="finder-card">
+                <!-- Step 1: Campus -->
+                <div class="finder-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Select Campus</h3>
+                        <div class="campus-grid" id="campusGrid">
+                            <!-- Will be loaded by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Budget -->
+                <div class="finder-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Set Budget</h3>
+                        <div class="budget-container">
+                            <div class="budget-display" id="budgetDisplay">
+                                <span class="currency">KES</span>
+                                <span class="amount">150</span>
+                            </div>
+                            
+                            <input type="range" min="20" max="500" value="150" step="10" 
+                                   class="budget-slider" id="budgetSlider">
+                            
+                            <div class="budget-presets">
+                                <button class="budget-preset" data-budget="50">KES 50</button>
+                                <button class="budget-preset" data-budget="100">KES 100</button>
+                                <button class="budget-preset active" data-budget="150">KES 150</button>
+                                <button class="budget-preset" data-budget="200">KES 200</button>
+                                <button class="budget-preset" data-budget="300">KES 300</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Find -->
+                <div class="finder-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Get Recommendations</h3>
+                        <button class="btn btn-primary btn-find" id="findBtn">
+                            <i class="fas fa-search"></i> Find Meals
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results -->
+    <section class="results-section">
+        <div class="container">
+            <div class="results-container" id="resultsContainer">
+                <div class="results-placeholder">
+                    <div class="placeholder-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3>Your Meal Suggestions Await</h3>
+                    <p>Select campus and budget above to see meal recommendations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WhatsApp Integration -->
+    <section class="whatsapp-section" id="whatsapp">
+        <div class="container">
+            <div class="whatsapp-card">
+                <div class="whatsapp-content">
+                    <div class="whatsapp-badge">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Bot
+                    </div>
+                    <h2>Get Meal Suggestions via WhatsApp</h2>
+                    <p>No internet? No problem! Chat with our AI-powered WhatsApp bot for instant meal recommendations.</p>
+                    
+                    <div class="whatsapp-features">
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Works without internet data</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>24/7 available</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Real-time price updates</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Survival tips & hacks</span>
+                        </div>
+                    </div>
+                    
+                    <a href="https://wa.me/254778796999?text=Hi%20ChakulaChap%20I%20need%20meal%20suggestions" 
+                       class="btn btn-whatsapp-large" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                        <div class="btn-text">
+                            <span class="btn-title">Chat on WhatsApp</span>
+                            <span class="btn-subtitle">+254 778 796 999</span>
+                        </div>
+                    </a>
+                    
+                    <div class="whatsapp-instructions">
+                        <h4>How to use:</h4>
+                        <ol>
+                            <li>Save this number: <strong>+254 778 796 999</strong></li>
+                            <li>Send "Hi" or "Hello" to start</li>
+                            <li>Follow the prompts to get meal suggestions</li>
+                            <li>Send "Tips" for student survival tips</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="whatsapp-preview">
+                    <div class="phone-mockup">
+                        <div class="phone-header">
+                            <div class="contact">
+                                <div class="contact-avatar">CC</div>
+                                <div class="contact-info">
+                                    <h4>ChakulaChap Kenya</h4>
+                                    <p>Online • AI Meal Assistant</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-messages">
+                            <div class="message received">
+                                <p>👋 *Karibu to ChakulaChap Kenya!* I help Kenyan students find affordable meals on campus!</p>
+                                <span class="time">09:41</span>
+                            </div>
+                            <div class="message sent">
+                                <p>CAMPUS UON BUDGET 100</p>
+                                <span class="time">09:42</span>
+                            </div>
+                            <div class="message received">
+                                <p>✅ Campus: UoN<br>✅ Budget: KES 100<br><br>🍛 *Meals under KES 100:*<br>1. Githeri - KES 50<br>2. Chapati+Beans - KES 60</p>
+                                <span class="time">09:42</span>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-input">
+                            <input type="text" placeholder="Type a message..." value="FIND">
+                            <button><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <div class="logo-icon">🍛</div>
+                        <div class="logo-text">
+                            <span class="logo-primary">ChakulaChap</span>
+                            <span class="logo-secondary">Kenya</span>
+                        </div>
+                    </div>
+                    <p class="footer-description">
+                        Empowering Kenyan university students with smart meal choices.
+                    </p>
+                    <div class="footer-social">
+                        <a href="https://wa.me/254778796999" target="_blank" class="social-link">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#find">Find Meals</a></li>
+                        <li><a href="#campuses">Campuses</a></li>
+                        <li><a href="#whatsapp">WhatsApp Bot</a></li>
+                        <li><a href="admin.html">Admin Panel</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Campuses</h4>
+                    <ul>
+                        <li><a href="#" data-campus="uo_nairobi">University of Nairobi</a></li>
+                        <li><a href="#" data-campus="ku">Kenyatta University</a></li>
+                        <li><a href="#" data-campus="jkuat">JKUAT Juja</a></li>
+                        <li><a href="#" data-campus="moi">Moi University</a></li>
+                        <li><a href="#" data-campus="egerton">Egerton University</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fab fa-whatsapp"></i>
+                            <div>
+                                <div class="contact-label">WhatsApp</div>
+                                <a href="https://wa.me/254778796999">+254 778 796 999</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <div class="contact-label">Email</div>
+                                <a href="mailto:anyumbasidol@gmail.com">anyumbasidol@gmail.com</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <div class="contact-label">M-Pesa</div>
+                                <span>+254 743 888 236</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 ChakulaChap Kenya. Made with ❤️ for Kenyan Students.</p>
+                <p>Email: anyumbasidol@gmail.com | Phone: +254 778 796 999</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h3>Login to ChakulaChap</h3>
+            <form id="loginForm">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <p class="modal-footer">
+                Don't have an account? <a href="#" onclick="showSignup()">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h3>Create Account</h3>
+            <form id="signupForm">
+                <input type="text" placeholder="Full Name" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <select required>
+                    <option value="">Select Campus</option>
+                    <option>University of Nairobi</option>
+                    <option>Kenyatta University</option>
+                    <option>JKUAT</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
